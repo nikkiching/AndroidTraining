@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">BMI</string>
+
+    <string name="hello_string">Hello!</string>
+    <string name="action_settings">Settings</string>
+    <string name="bmi_height">Height</string>
+    <string name="bmi_weight">Weight</string>
+    <string name="bmi_btn">Calculate BMI</string>
+    <string name="bmi_result">Your BMI is </string>
+
+    <string name="advice_heavy">More than normal BMI standard</string>
+    <string name="advice_average">Reach average BMI standard</string>
+    <string name="advice_light">Less than normal BMI standard</string>
+
+    <string name="about_title">About Android BMI</string>
+    <string name="about_content">Android BMI Calculator\nAuthor: Ching Chang\n
+    </string>
+    <string name="about_homepage_label">Home Page</string>
+    <string name="about_homepage_uri">http://google.com</string>
+    <string name="about_ok_label">OK</string>
+    <string name="input_error_msg">You can only input integer number</string>
+    <string name="bmi_title">BMI Calculator</string>
+
+    <string name="title_activity_report">BMI Report</string>
+    <string name="report_back">Back to BMI</string>
+
+</resources>
