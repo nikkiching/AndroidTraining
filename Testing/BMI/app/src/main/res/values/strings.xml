@@ -23,5 +23,7 @@
 
     <string name="title_activity_report">BMI Report</string>
     <string name="report_back">Back to BMI</string>
-
+    <string name="menu_about">About</string>
+    <string name="menu_quit">Quit</string>
+    <string name="menu_notify">Notification</string>
 </resources>

@@ -2,6 +2,9 @@ package com.ching_chang.bmi;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,8 +44,8 @@ public class BMI extends ActionBarActivity {
     private EditText fieldheight;
     private EditText fieldweight;
 
-    protected static final int Menu_About = Menu.FIRST;
-    protected static final int Menu_Quit = Menu.FIRST+1;
+    //protected static final int Menu_About = Menu.FIRST;
+    //protected static final int Menu_Quit = Menu.FIRST+1;
     private void findViews(){
         calcbtn = (Button) findViewById(R.id.submit);
         fieldheight = (EditText)findViewById(R.id.height);
@@ -113,14 +116,34 @@ public class BMI extends ActionBarActivity {
         dialog.show();
     }
 
+    private void bmi_notify(){
+        // Build  notification
+        Notification.Builder notifyBuilder = new Notification.Builder(this);
+        notifyBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        notifyBuilder.setContentTitle("Notification Test");
+        notifyBuilder.setContentText("This is a notification.");
+        notifyBuilder.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
+        notifyBuilder.setAutoCancel(true);
+
+        // Setting the activity triggered by the notification
+        Intent notifyIntent = new Intent(this, BMI.class);
+        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        notifyBuilder.setContentIntent(pendingIntent);
+
+        // Get Notification service
+        final int notifyID = 0;
+        NotificationManager nManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        nManager.notify(notifyID, notifyBuilder.build());
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_bmi, menu);
         super.onCreateOptionsMenu(menu);
-        menu.add(0, Menu_About, 0, "BMI");
-        menu.add(0, Menu_Quit, 0, "Quit");
+        //menu.add(0, Menu_About, 0, "BMI");
+        //menu.add(0, Menu_Quit, 0, "Quit");
         return true;
     }
 
@@ -132,15 +155,17 @@ public class BMI extends ActionBarActivity {
         super.onOptionsItemSelected(item);
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
         switch(id){
-            case Menu_About:
+            //case Menu_About:
+            case R.id.menu_about:
                 openOptionsDialog();
                 break;
-            case Menu_Quit:
+            //case Menu_Quit:
+            case R.id.menu_quit:
                 finish();
+                break;
+            case R.id.menu_notify:
+                bmi_notify();
                 break;
             case R.id.action_settings:
                 break;
