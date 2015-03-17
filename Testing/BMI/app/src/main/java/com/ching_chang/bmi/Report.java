@@ -11,7 +11,12 @@ import android.widget.TextView;
 import java.text.DecimalFormat;
 
 
-public class Report extends ActionBarActivity {
+public class Report extends BMI {
+    private Button backBtn;
+    private TextView resultView;
+    private TextView suggestView;
+    private int bmiNormalMin = 20;
+    private int bmiNormalMax = 25;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,60 +26,38 @@ public class Report extends ActionBarActivity {
         showResults();
         setListeners();
     }
-    private Button btn_back;
-    private TextView view_result;
-    private TextView view_suggest;
     private void findViews(){
-        btn_back = (Button) findViewById(R.id.report_back);
-        view_result = (TextView) findViewById(R.id.result);
-        view_suggest = (TextView) findViewById(R.id.suggest);
+        backBtn = (Button) findViewById(R.id.report_back);
+        resultView = (TextView) findViewById(R.id.result);
+        suggestView = (TextView) findViewById(R.id.suggest);
     }
     private void showResults(){
         DecimalFormat nf = new DecimalFormat("0.00");
         Bundle bundle = this.getIntent().getExtras();
-        double height = bundle.getDouble("KEY_height")/100;
-        double weight = bundle.getDouble("KEY_weight");
+
+        double height = Double.parseDouble(bundle.getString(BMI.KEY_HEIGHT))/100;
+        double weight = Double.parseDouble(bundle.getString(BMI.KEY_WEIGHT));
         double BMI = weight / (height *height);
-        view_result.setText(getText(R.string.bmi_result) + nf.format(BMI));
+        resultView.setText(getText(R.string.bmi_result) + nf.format(BMI));
 
         //Give health advice
-        if(BMI >25){
-            view_suggest.setText(R.string.advice_heavy);
-        }else if (BMI<20){
-            view_suggest.setText(R.string.advice_light);
+        if(BMI > bmiNormalMax){
+            suggestView.setText(R.string.advice_heavy);
+        }else if (BMI< bmiNormalMin){
+            suggestView.setText(R.string.advice_light);
         }else{
-            view_suggest.setText(R.string.advice_average);
+            suggestView.setText(R.string.advice_average);
         }
     }
     // Listen for btn clicks
     private void setListeners(){
-        btn_back.setOnClickListener(back_Main);
+        backBtn.setOnClickListener(back2Main);
     }
-    private Button.OnClickListener back_Main = new Button.OnClickListener(){
+    private Button.OnClickListener back2Main = new Button.OnClickListener(){
         public void onClick(View v){
             // Close this Activity
             Report.this.finish();
         }
     };
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_report, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 }

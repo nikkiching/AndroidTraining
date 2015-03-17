@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +13,8 @@ import android.media.RemoteController;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,13 +28,22 @@ import java.text.DecimalFormat;
 
 public class BMI extends ActionBarActivity {
     private static final String TAG = "BMI";
-    public static final String Prefer = "BMI_Pref";
-    public static final String Prefer_height = "BMI_height";
+    public static final String PREFER = "BMI_Pref";
+    public static final String PREFER_HEIGHT = "BMI_height";
+    protected static final String KEY_HEIGHT = "KEY_height";
+    protected static final String KEY_WEIGHT = "KEY_weight";
 
+    private Button mCalBtn;
+    private EditText mHeightField;
+    private EditText mWeightField;
+
+    //protected static final int Menu_About = Menu.FIRST;
+    //protected static final int Menu_Quit = Menu.FIRST+1;
     //  Called when the activity is first created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate()...");
         setContentView(R.layout.activity_bmi);
 
         openWelcomePopup();
@@ -40,36 +52,31 @@ public class BMI extends ActionBarActivity {
         restorePreferValue();
         setListeners();
     }
-    private Button calcbtn;
-    private EditText fieldheight;
-    private EditText fieldweight;
 
-    //protected static final int Menu_About = Menu.FIRST;
-    //protected static final int Menu_Quit = Menu.FIRST+1;
-    private void findViews(){
-        calcbtn = (Button) findViewById(R.id.submit);
-        fieldheight = (EditText)findViewById(R.id.height);
-        fieldweight = (EditText)findViewById(R.id.weight);
+    private void findViews() {
+        mCalBtn = (Button) findViewById(R.id.submit);
+        mHeightField = (EditText)findViewById(R.id.height);
+        mWeightField = (EditText)findViewById(R.id.weight);
     }
-    private void setListeners(){
-        calcbtn.setOnClickListener(calcBMI);
+    private void setListeners() {
+        mCalBtn.setOnClickListener(calcBMI);
     }
+
     private Button.OnClickListener calcBMI = new Button.OnClickListener() {
         @Override
         public void onClick(View v) {
-            String str_height = fieldheight.getText().toString();
-            String str_weight = fieldweight.getText().toString();
-            if (str_height.equals("") || str_weight.equals("")){
+            String height = mHeightField.getText().toString();
+            String weight = mWeightField.getText().toString();
+            if (TextUtils.isEmpty(height) || TextUtils.isEmpty(weight)) {
+                //TextUtils.isEmpty(str_height)
                 openErrorPopup();
             } else {
-                double height = Double.parseDouble(str_height);
-                double weight = Double.parseDouble(str_weight);
                 // Switch to Report page
                 Intent intent = new Intent();
                 intent.setClass(BMI.this, Report.class);
                 Bundle bundle = new Bundle();
-                bundle.putDouble("KEY_height", height);
-                bundle.putDouble("KEY_weight", weight);
+                bundle.putString(KEY_HEIGHT, height);
+                bundle.putString(KEY_WEIGHT, weight);
                 intent.putExtras(bundle);
                 startActivity(intent);
             }
@@ -77,16 +84,15 @@ public class BMI extends ActionBarActivity {
     };
     // Restore preferences
     private void restorePreferValue(){
-        SharedPreferences settings = getSharedPreferences(Prefer, 0);
-        String prefer_height = settings.getString(Prefer_height, "");
-        if (! "".equals(prefer_height)){
-            fieldheight.setText(prefer_height);
-            fieldweight.requestFocus();
+        SharedPreferences settings = getSharedPreferences(PREFER, Context.MODE_PRIVATE);
+        String preferHeight = settings.getString(PREFER_HEIGHT, "");
+        if (! TextUtils.isEmpty(preferHeight)){
+            mHeightField.setText(preferHeight);
+            mWeightField.requestFocus();
         }
     }
     private void openErrorPopup(){
-        Toast popup = Toast.makeText(BMI.this, R.string.input_error_msg,Toast.LENGTH_SHORT);
-        popup.show();
+        Toast.makeText(BMI.this, R.string.input_error_msg,Toast.LENGTH_SHORT).show();
     }
     private void openWelcomePopup(){
         // Using Toast to show about
@@ -120,8 +126,8 @@ public class BMI extends ActionBarActivity {
         // Build  notification
         Notification.Builder notifyBuilder = new Notification.Builder(this);
         notifyBuilder.setSmallIcon(R.mipmap.ic_launcher);
-        notifyBuilder.setContentTitle("Notification Test");
-        notifyBuilder.setContentText("This is a notification.");
+        notifyBuilder.setContentTitle(getString(R.string.bmi_title));
+        notifyBuilder.setContentText(getString(R.string.bmi_notify_text));
         notifyBuilder.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
         notifyBuilder.setAutoCancel(true);
 
@@ -176,8 +182,9 @@ public class BMI extends ActionBarActivity {
     @Override
     protected void onPause(){
         super.onPause();
+        Log.d(TAG, "onPause()...");
         // Save user preferences. Use editor to make changes.
-        SharedPreferences settings = getSharedPreferences(Prefer, 0);
-        settings.edit().putString(Prefer_height, fieldheight.getText().toString()).commit();
+        SharedPreferences settings = getSharedPreferences(PREFER, 0);
+        settings.edit().putString(PREFER_HEIGHT, mHeightField.getText().toString()).commit();
     }
 }

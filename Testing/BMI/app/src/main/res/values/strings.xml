@@ -20,6 +20,7 @@
     <string name="about_ok_label">OK</string>
     <string name="input_error_msg">You can only input integer number</string>
     <string name="bmi_title">BMI Calculator</string>
+    <string name="bmi_notify_text">Come back to use BMI Calculator!</string>
 
     <string name="title_activity_report">BMI Report</string>
     <string name="report_back">Back to BMI</string>
