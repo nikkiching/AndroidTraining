@@ -1,0 +1,105 @@
+<resources>
+    <string name="app_name">Piggy Diary</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="hello_blank_fragment">Fragment main</string>
+    <string name="btn_pay">Payment</string>
+    <string name="btn_income">Income</string>
+    <string name="btn_report">Report</string>
+    <string name="list_day">Daily Statistics</string>
+    <string name="list_week">Weekly Statistics</string>
+    <string name="list_month">Monthly Statistics</string>
+    <string name="list_all">All Statistics</string>
+
+    <string name="pay_title">Payment</string>
+    <string name="money">Money</string>
+    <string name="money_default">0</string>
+    <string name="label">Category</string>
+    <string name="sub_label">Sub Category</string>
+    <string name="date">Date</string>
+    <string name="note">Note</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="date_title">Select the date</string>
+
+
+    <string name="menu_about">About</string>
+    <string name="menu_quit">Quit</string>
+    <string name="title_activity_pay">PayActivity</string>
+    <string name="title_activity_calculator">CalculatorActivity</string>
+
+    <string-array name="LabelList_payment">
+        <item>食物</item>
+        <item>家用</item>
+        <item>交通</item>
+        <item>娛樂</item>
+        <item>學習</item>
+        <item>醫療</item>
+        <item>雜項</item>
+    </string-array>
+    <string name="label_food">Food</string>
+
+    <string-array name="SubLabel_food">
+        <item>早餐</item>
+        <item>午餐</item>
+        <item>晚餐</item>
+        <item>茶飲</item>
+    </string-array>
+
+    <string-array name="SubLabel_utility">
+        <item>日常用品</item>
+        <item>水電瓦斯</item>
+        <item>房租房貸</item>
+        <item>電話費</item>
+        <item>網路費</item>
+    </string-array>
+
+    <string-array name="SubLabel_transportation">
+        <item>公共交通</item>
+        <item>計程車</item>
+        <item>汽機車加油</item>
+        <item>火車</item>
+        <item>飛機</item>
+    </string-array>
+
+    <string-array name="SubLabel_recreation">
+        <item>聚餐</item>
+        <item>敗家</item>
+        <item>寵物</item>
+        <item>運動</item>
+    </string-array>
+
+    <string-array name="SubLabel_study">
+        <item>書報雜誌</item>
+        <item>上課進修</item>
+        <item>網路進修</item>
+    </string-array>
+
+    <string-array name="SubLabel_medication">
+        <item>生病</item>
+        <item>健檢</item>
+    </string-array>
+
+    <string-array name="SubLabel_other">
+        <item>其他</item>
+    </string-array>
+    <string name="title_activity_update">UpdateActivity</string>
+    <string name="title_activity_item_list">ItemListActivity</string>
+
+    <string-array name="LabelList_income">
+        <item>工作</item>
+        <item>其他</item>
+    </string-array>
+
+    <string-array name="SubLabel_work">
+        <item>薪水</item>
+        <item>兼職</item>
+    </string-array>
+
+    <string-array name="SubLabel_otherIncome">
+        <item>禮物</item>
+        <item>中獎</item>
+    </string-array>
+
+</resources>
