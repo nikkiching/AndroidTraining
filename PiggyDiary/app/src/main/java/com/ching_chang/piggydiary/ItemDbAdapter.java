@@ -1,16 +1,34 @@
 package com.ching_chang.piggydiary;
 
+import android.app.backup.BackupAgentHelper;
+import android.app.backup.BackupDataInput;
+import android.app.backup.BackupDataOutput;
+import android.app.backup.FileBackupHelper;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Ching_Chang on 2015/4/10.
@@ -25,10 +43,11 @@ public class ItemDbAdapter {
     private final static String KEY_LABEL = "Label";
     private final static String KEY_SUBLABEL = "SubLabel";
     private final static String KEY_IMAGE = "Image";
-    private final static String DB_NAME = "Item";
+    private final static String KEY_IMAGE_PATH = "Path";
+    protected final static String DB_NAME = "Item";
     private final static String DB_TABLE_RECORD = "Record";
-    private final static int DB_VERSION = 2;
-
+    private final static int DB_VERSION = 3;
+    private static final Object sDataLock = new Object();
     public ItemDbHelper mDbHelper;
 
     private final Context mContext;
@@ -41,9 +60,11 @@ public class ItemDbAdapter {
                     "Label INTEGER NOT NULL," +
                     "SubLabel INTEGER NOT NULL," +
                     "Note TEXT," +
-                    "Image TEXT); ";
+                    "Image TEXT, Path TEXT); ";
 
-    private static final String DB_Count = "SELECT COUNT(*) FROM ";
+    private static final String [] mCol = { KEY_ID, KEY_DATE, KEY_MONEY, KEY_LABEL,
+            KEY_SUBLABEL, KEY_NOTE, KEY_IMAGE, KEY_IMAGE_PATH};
+    private static final String DB_COUNT = "SELECT COUNT(*) FROM ";
 
     public ItemDbAdapter(Context context){
         this.mContext = context;
@@ -69,14 +90,7 @@ public class ItemDbAdapter {
 
     // Method: Insert
     public Item insertItem(Item item) {
-        ContentValues record = new ContentValues();
-        record.put(KEY_MONEY, item.getMoney());
-        record.put(KEY_DATE, item.getDate());
-        record.put(KEY_NOTE, item.getNote());
-        record.put(KEY_LABEL, item.getCategory());
-        record.put(KEY_SUBLABEL, item.getSubCategory());
-        record.put(KEY_IMAGE, item.getImage());
-
+        ContentValues record = putRecord(item);
         // 1: table name, 2: default value for columns without value, 3: content value
         long id = mDb.insert(DB_TABLE_RECORD, null, record);
         item.setId(id);
@@ -85,6 +99,11 @@ public class ItemDbAdapter {
 
     // Method: Update
     public boolean updateItem(Item item) {
+        ContentValues record = putRecord(item);
+        String where = KEY_ID + "=" + item.getID();
+        return mDb.update(DB_TABLE_RECORD, record, where, null) > 0 ;
+    }
+    private ContentValues putRecord(Item item){
         ContentValues record = new ContentValues();
         record.put(KEY_MONEY, item.getMoney());
         record.put(KEY_DATE, item.getDate());
@@ -92,10 +111,9 @@ public class ItemDbAdapter {
         record.put(KEY_LABEL, item.getCategory());
         record.put(KEY_SUBLABEL, item.getSubCategory());
         record.put(KEY_IMAGE, item.getImage());
-        String where = KEY_ID + "=" + item.getID();
-        return mDb.update(DB_TABLE_RECORD, record, where, null) > 0 ;
+        record.put(KEY_IMAGE_PATH, item.getImagePath());
+        return record;
     }
-
     // Method: Delete
     public boolean delete(long id){
         String where = KEY_ID + "=" + id;
@@ -105,8 +123,7 @@ public class ItemDbAdapter {
     // Method: Fetch
     public List<Item> fetchAll(){
         List<Item> result = new ArrayList<>();
-        String [] col = { KEY_ID, KEY_DATE, KEY_MONEY, KEY_LABEL, KEY_SUBLABEL, KEY_NOTE, KEY_IMAGE};
-        Cursor cursor = mDb.query(DB_TABLE_RECORD, col, null, null, null, null, null);
+        Cursor cursor = mDb.query(DB_TABLE_RECORD, mCol, null, null, null, null, null);
         while (cursor.moveToNext()){
             result.add(getRecord(cursor));
         }
@@ -115,7 +132,6 @@ public class ItemDbAdapter {
     }
     public List<Item> fetchDay(){
         List<Item> result = new ArrayList<>();
-        String [] col = { KEY_ID, KEY_DATE, KEY_MONEY, KEY_LABEL, KEY_SUBLABEL, KEY_NOTE, KEY_IMAGE};
         Calendar c = Calendar.getInstance();
         int day = c.get(Calendar.DAY_OF_MONTH);
         int month = c.get(Calendar.MONTH);
@@ -124,7 +140,7 @@ public class ItemDbAdapter {
         c1.set(year, month, day,0,0,0);
         Calendar c2 = Calendar.getInstance();
         c2.set(year, month, day,23,59,59);
-        Cursor cursor = mDb.query(DB_TABLE_RECORD, col, KEY_DATE + " BETWEEN " + c1.getTimeInMillis() + " AND " + c2.getTimeInMillis(), null, null, null, KEY_DATE);
+        Cursor cursor = mDb.query(DB_TABLE_RECORD, mCol, KEY_DATE + " BETWEEN " + c1.getTimeInMillis() + " AND " + c2.getTimeInMillis(), null, null, null, KEY_DATE);
         while (cursor.moveToNext()){
             result.add(getRecord(cursor));
         }
@@ -133,7 +149,6 @@ public class ItemDbAdapter {
     }
     public List<Item> fetchWeek(){
         List<Item> result = new ArrayList<>();
-        String [] col = { KEY_ID, KEY_DATE, KEY_MONEY, KEY_LABEL, KEY_SUBLABEL, KEY_NOTE, KEY_IMAGE};
         Calendar c = Calendar.getInstance();
         int day = c.get(Calendar.DAY_OF_MONTH);
         int month = c.get(Calendar.MONTH);
@@ -144,7 +159,7 @@ public class ItemDbAdapter {
         Calendar c2 = Calendar.getInstance();
         c2.set(year, month, day,23,59,59);
         c2.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek() + 6);
-        Cursor cursor = mDb.query(DB_TABLE_RECORD, col, KEY_DATE + " BETWEEN " + c1.getTimeInMillis() + " AND " + c2.getTimeInMillis(), null, null, null, KEY_DATE);
+        Cursor cursor = mDb.query(DB_TABLE_RECORD, mCol, KEY_DATE + " BETWEEN " + c1.getTimeInMillis() + " AND " + c2.getTimeInMillis(), null, null, null, KEY_DATE);
         while (cursor.moveToNext()){
             result.add(getRecord(cursor));
         }
@@ -153,7 +168,6 @@ public class ItemDbAdapter {
     }
     public List<Item> fetchMonth(){
         List<Item> result = new ArrayList<>();
-        String [] col = { KEY_ID, KEY_DATE, KEY_MONEY, KEY_LABEL, KEY_SUBLABEL, KEY_NOTE, KEY_IMAGE};
         Calendar c = Calendar.getInstance();
         int dayMax = c.getActualMaximum(Calendar.DAY_OF_MONTH);
         int dayMin = c.getActualMinimum(Calendar.DAY_OF_MONTH);
@@ -163,7 +177,7 @@ public class ItemDbAdapter {
         c1.set(year, month, dayMin,0,0,0);
         Calendar c2 = Calendar.getInstance();
         c2.set(year, month, dayMax,23,59,59);
-        Cursor cursor = mDb.query(DB_TABLE_RECORD, col, KEY_DATE + " BETWEEN " + c1.getTimeInMillis() + " AND " + c2.getTimeInMillis(), null, null, null, KEY_DATE);
+        Cursor cursor = mDb.query(DB_TABLE_RECORD, mCol, KEY_DATE + " BETWEEN " + c1.getTimeInMillis() + " AND " + c2.getTimeInMillis(), null, null, null, KEY_DATE);
         while (cursor.moveToNext()){
             result.add(getRecord(cursor));
         }
@@ -172,20 +186,97 @@ public class ItemDbAdapter {
     }
     public Item getRecord(Cursor cursor) throws SQLException {
         Item result = new Item(cursor.getLong(0), cursor.getLong(1), cursor.getDouble(2), cursor.getInt(3),
-                cursor.getInt(4), cursor.getString(5), cursor.getString(6));
+                cursor.getInt(4), cursor.getString(5), cursor.getString(6), cursor.getString(7));
         return result;
     }
 
+    public void createCSV(File outFile) throws IOException{
+        OutputStream outputStream = new FileOutputStream(outFile);
+
+//        FileWriter outF = new FileWriter(outFile);
+        BufferedWriter buffer = null;
+                Cursor cursor = null;
+        try {
+            buffer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+            String [] col = { KEY_DATE, KEY_MONEY, KEY_LABEL,KEY_NOTE };
+            cursor = mDb.query(DB_TABLE_RECORD, col, null, null, null, null, KEY_DATE);
+            String head = Arrays.toString(col);
+            buffer.write(head);
+            buffer.newLine();
+            Log.d(TAG, "Write head.");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+            String[] labelPayment = mContext.getResources().getStringArray(R.array.labelPayment);
+            String[] labelIncome = mContext.getResources().getStringArray(R.array.labelIncome);
+            while (cursor.moveToNext()){
+                int category = cursor.getInt(2);
+                String label;
+                if ( category < labelPayment.length){
+                    label = labelPayment[category];
+                } else {
+                    label = labelIncome[category-labelPayment.length];
+                }
+                Log.d(TAG, "label" + label);
+                String[] data = new String[] {
+                        dateFormat.format(new Date(cursor.getLong(0))),
+                        Double.toString(cursor.getDouble(1)),
+                        label,
+//                        Integer.toString(category),
+                        cursor.getString(3) };
+                buffer.write(Arrays.toString(data));
+                buffer.newLine();
+            }
+        } finally {
+            if (buffer != null){
+                buffer.flush();
+                buffer.close();
+            }
+            if (cursor != null){
+                cursor.close();
+            }
+        }
+    }
 
     public int getCount(){
         int result = 0;
-        Cursor cursor = mDb.rawQuery(DB_Count + DB_TABLE_RECORD, null);
+        Cursor cursor = mDb.rawQuery(DB_COUNT + DB_TABLE_RECORD, null);
         if (cursor.moveToNext()) {
             result = cursor.getInt(0);
         }
         cursor.close();
         return result;
     }
+    public class BackupAgent extends BackupAgentHelper {
+
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            FileBackupHelper hosts = new FileBackupHelper(this, DB_NAME);
+            addHelper("db", hosts);
+        }
+
+        @Override
+        public File getFilesDir(){
+            File path = getDatabasePath(DB_NAME);
+            return path.getParentFile();
+        }
+
+        @Override
+        public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data, ParcelFileDescriptor newState) throws IOException {
+            synchronized (sDataLock){
+                Log.d(TAG, "Start backup");
+                super.onBackup(oldState, data, newState);
+            }
+        }
+
+        @Override
+        public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState) throws IOException {
+            synchronized (sDataLock) {
+                Log.d(TAG, "Start restore");
+                super.onRestore(data, appVersionCode, newState);
+            }
+        }
+    }
+
     /*
          * Open the database. If it cannot be opened, try to create a new instance
          * of the database. If it cannot be created, throw an exception to signal

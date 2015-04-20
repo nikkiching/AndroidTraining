@@ -22,14 +22,39 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="date_title">Select the date</string>
+    <string name="image">Image</string>
+    <string name="image_take_new">Take new picture?</string>
+    <string name="image_ok">OK</string>
+    <string name="image_new">New</string>
 
 
     <string name="menu_about">About</string>
     <string name="menu_quit">Quit</string>
+    <string name="delete_title">Delete</string>
+    <string name="delete_text">Do you want to delete this?</string>
+    <string name="backup_title">Backup</string>
+    <string name="backup_text">Do you want to start backup?</string>
     <string name="title_activity_pay">PayActivity</string>
     <string name="title_activity_calculator">CalculatorActivity</string>
+    <string name="default_notify">預設提醒時間</string>
+    <string name="default_notify_summary">在指定的時間通知產生報告</string>
 
-    <string-array name="LabelList_payment">
+
+    <string-array name="notify_minutes_array">
+        <item>不通知</item>
+        <item>一分鐘</item>
+        <item>一天</item>
+        <item>月初</item>
+    </string-array>
+
+    <string-array name="notify_minutes_value_array">
+        <item>0</item>
+        <item>1</item>
+        <item>1440</item>
+        <item>43200</item>
+    </string-array>
+
+    <string-array name="labelPayment">
         <item>食物</item>
         <item>家用</item>
         <item>交通</item>
@@ -38,16 +63,35 @@
         <item>醫療</item>
         <item>雜項</item>
     </string-array>
-    <string name="label_food">Food</string>
 
-    <string-array name="SubLabel_food">
+    <string-array name="labelIncome">
+        <item>工作</item>
+        <item>其他</item>
+    </string-array>
+
+    <string-array name="labelPaymentValue">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+
+    <string-array name="labelIncomeValue">
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+
+    <string-array name="subLabelFood">
         <item>早餐</item>
         <item>午餐</item>
         <item>晚餐</item>
         <item>茶飲</item>
     </string-array>
 
-    <string-array name="SubLabel_utility">
+    <string-array name="subLabelUtility">
         <item>日常用品</item>
         <item>水電瓦斯</item>
         <item>房租房貸</item>
@@ -55,7 +99,7 @@
         <item>網路費</item>
     </string-array>
 
-    <string-array name="SubLabel_transportation">
+    <string-array name="subLabelTransportation">
         <item>公共交通</item>
         <item>計程車</item>
         <item>汽機車加油</item>
@@ -63,41 +107,36 @@
         <item>飛機</item>
     </string-array>
 
-    <string-array name="SubLabel_recreation">
+    <string-array name="subLabelRecreation">
         <item>聚餐</item>
         <item>敗家</item>
         <item>寵物</item>
         <item>運動</item>
     </string-array>
 
-    <string-array name="SubLabel_study">
+    <string-array name="subLabelStudy">
         <item>書報雜誌</item>
         <item>上課進修</item>
         <item>網路進修</item>
     </string-array>
 
-    <string-array name="SubLabel_medication">
+    <string-array name="subLabelMedication">
         <item>生病</item>
         <item>健檢</item>
     </string-array>
 
-    <string-array name="SubLabel_other">
+    <string-array name="subLabelOther">
         <item>其他</item>
     </string-array>
-    <string name="title_activity_update">UpdateActivity</string>
-    <string name="title_activity_item_list">ItemListActivity</string>
+    <string name="title_activity_update">新增資料</string>
+    <string name="title_activity_item_list">統計</string>
 
-    <string-array name="LabelList_income">
-        <item>工作</item>
-        <item>其他</item>
-    </string-array>
-
-    <string-array name="SubLabel_work">
+    <string-array name="subLabelWork">
         <item>薪水</item>
         <item>兼職</item>
     </string-array>
 
-    <string-array name="SubLabel_otherIncome">
+    <string-array name="subLabelOtherIncome">
         <item>禮物</item>
         <item>中獎</item>
     </string-array>

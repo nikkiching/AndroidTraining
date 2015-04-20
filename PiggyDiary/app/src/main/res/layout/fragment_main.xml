@@ -33,6 +33,17 @@
         android:background="@drawable/btn_shape"
         android:text="@string/btn_report"
         android:onClick="onClickMain" />
+    <ToggleButton
+        android:id="@+id/backup_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/item_label"
+        android:textOn=" On"
+        android:textOff="Off"
+        android:onClick="onToggleClicked"
+        android:layout_below="@+id/income_btn"
+        android:layout_alignRight="@+id/income_btn"
+        android:layout_alignEnd="@+id/income_btn" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

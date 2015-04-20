@@ -1,6 +1,8 @@
 package com.ching_chang.piggydiary;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import java.util.List;
@@ -58,7 +61,7 @@ public class ItemListActivity extends ActionBarActivity {
         // If edit or delete return ok
         if (resultCode == Activity.RESULT_OK) {
             // Get Item
-            Item item = (Item) data.getExtras().getSerializable("KEY_ITEM");
+            Item item = (Item) data.getExtras().getSerializable(KEY_ITEM);
 
             switch (requestCode){
                 case EDIT:
@@ -67,8 +70,7 @@ public class ItemListActivity extends ActionBarActivity {
 
                     if (position != -1) {
                         // reset the item
-                        mItems.set(position, item);
-                        mItemAdapter.notifyDataSetChanged();
+                        mItemAdapter.set(position, item);
                     }
                     break;
                 case DELETE:
@@ -93,7 +95,7 @@ public class ItemListActivity extends ActionBarActivity {
     private AdapterView.OnItemClickListener mItemListen = new AdapterView.OnItemClickListener(){
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-            Item item = mItemAdapter.getItem(position);
+            Item item = mItemAdapter.get(position);
             Intent intent;
             if (item.getCategory() > 6) {
                 intent = new Intent(UpdateActivity.EDIT_INCOME);
@@ -108,11 +110,22 @@ public class ItemListActivity extends ActionBarActivity {
     private AdapterView.OnItemLongClickListener mItemLongListen = new AdapterView.OnItemLongClickListener(){
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
-            Item item = mItemAdapter.getItem(position);
-            mDbAdapter.delete(item.getID());
-            mItemAdapter.remove(item);
-            mItemAdapter.notifyDataSetChanged();
+            AlertDialog.Builder dialog = new AlertDialog.Builder(ItemListActivity.this);
+            dialog.setTitle(R.string.delete_title);
+            dialog.setMessage(R.string.delete_text);
+            final int pos = position;
+            dialog.setPositiveButton(android.R.string.yes, new
+                    DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Item item = mItemAdapter.get(pos);
+                            mDbAdapter.delete(item.getID());
+                            mItemAdapter.remove(item);
+                            mItemAdapter.notifyDataSetChanged();
+                        }
+                    });
+            dialog.setNegativeButton(android.R.string.no, null);
+            dialog.show();
             return false;
         }
     };
@@ -136,5 +149,11 @@ public class ItemListActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mDbAdapter.dbClose();
     }
 }

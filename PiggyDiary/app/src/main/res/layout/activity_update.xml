@@ -14,83 +14,99 @@
     android:orientation="vertical" >
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <ImageButton
+        android:layout_height="230dp">
+        <!--<ImageButton-->
+            <!--android:id="@+id/img_input"-->
+            <!--android:layout_width="@dimen/item_image_sizeX"-->
+            <!--android:layout_height="@dimen/item_image_sizeY"-->
+            <!--android:scaleType="fitCenter"-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:layout_alignParentLeft="true"-->
+            <!--android:layout_alignParentStart="true" />-->
+        <ImageView
             android:id="@+id/img_input"
-            android:layout_width="@dimen/item_image_size"
-            android:layout_height="@dimen/item_image_size"
-            android:scaleType="fitXY"
-            android:src="@mipmap/ic_action_photo" />
+            android:contentDescription="@string/image"
+            android:layout_width="@dimen/item_image_sizeX"
+            android:layout_height="@dimen/item_image_sizeY"
+            android:scaleType="fitCenter"
+            android:src="@mipmap/ic_action_photo"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/img_input"
+            android:layout_marginLeft="@dimen/activity_vertical_margin"
+            android:stretchColumns="0"
+            android:layout_alignParentBottom="true">
+
+            <TableRow>
+                <TextView android:id="@+id/money_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/money" />
+            </TableRow>
+            <TableRow>
+                <EditText android:id="@+id/input_money"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"/>
+            </TableRow>
+            <TableRow>
+                <TextView android:id="@+id/date_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/date" />
+
+            </TableRow>
+            <TableRow>
+                <Button android:id="@+id/input_date"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:color="@color/white"/>
+            </TableRow>
+            <TableRow>
+                <TextView android:id="@+id/label_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label" />
+            </TableRow>
+            <TableRow>
+                <Spinner android:id="@+id/input_label"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/input_field_height"
+                    android:spinnerMode="dialog"/>
+            </TableRow>
+            <TableRow>
+                <TextView android:id="@+id/sub_label_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sub_label" />
+            </TableRow>
+            <TableRow>
+                <Spinner android:id="@+id/input_sub_label"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/input_field_height"
+                    android:spinnerMode="dialog"/>
+            </TableRow>
+        </TableLayout>
         </RelativeLayout>
-    <TableLayout
+
+    <TextView android:id="@+id/note_title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:stretchColumns="1" >
-        <TableRow>
-            <TextView android:id="@+id/update_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text=""/>
-        </TableRow>
-        <TableRow>
-            <TextView android:id="@+id/money_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/money" />
-            <EditText android:id="@+id/input_money"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:numeric="integer"/>
-        </TableRow>
-        <TableRow>
-            <TextView android:id="@+id/date_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/date" />
-            <Button android:id="@+id/input_date"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:color="@color/white"/>
-        </TableRow>
-        <TableRow>
-            <TextView android:id="@+id/label_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/label" />
-            <Spinner android:id="@+id/input_label"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/input_field_height"
-                android:spinnerMode="dialog"/>
-        </TableRow>
-        <TableRow>
-            <TextView android:id="@+id/sub_label_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sub_label" />
-            <Spinner android:id="@+id/input_sub_label"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/input_field_height"
-                android:spinnerMode="dialog"/>
-        </TableRow>
-        <TableRow>
-            <TextView android:id="@+id/note_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/note" />
-        </TableRow>
-    </TableLayout>
-    <EditText android:id="@+id/input_note"
+        android:layout_height="@dimen/input_field_height"
         android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:text="@string/note" />
+    <EditText android:id="@+id/input_note"
         android:background="@drawable/inputfield_boarder"
         android:layout_width="match_parent"
         android:layout_height="@dimen/note_field_height"
         android:padding="@dimen/input_field_padding"
         android:inputType="textMultiLine"
-        android:maxLines="4"
+        android:maxLines="5"
         android:minLines="1"
-        android:gravity="top|left"
+        android:gravity="top|start"
         android:scrollbars="vertical"/>
     <RelativeLayout
         android:layout_width="match_parent"
@@ -98,22 +114,22 @@
         android:layout_marginTop="@dimen/activity_vertical_margin">
         <Button
             android:id="@+id/ok_btn"
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:background="@drawable/btn_shape"
+            android:text="@string/ok"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:text="@string/ok" />
+            android:layout_alignParentEnd="true" />
         <Button
             android:id="@+id/cancel_btn"
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/activity_vertical_margin"
-            android:layout_toLeftOf="@id/ok_btn"
-            android:layout_alignParentBottom="true"
             android:background="@drawable/btn_shape"
-            android:text="@string/cancel"/>
+            android:text="@string/cancel"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
         </RelativeLayout>
 </LinearLayout>
 <!--</ScrollView>-->

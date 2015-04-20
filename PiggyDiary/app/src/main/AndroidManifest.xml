@@ -2,14 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ching_chang.piggydiary" >
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/pig_ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:backupAgent=".ItemDbAdapter$BackupAgent" >
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,12 +24,14 @@
             android:name=".UpdateActivity"
             android:label="@string/title_activity_update"
             android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan" >
             <intent-filter>
                 <action android:name="com.ching_chang.piggydiary.EDIT_ITEM_PAYMENT" />
                 <action android:name="com.ching_chang.piggydiary.ADD_ITEM_PAYMENT" />
                 <action android:name="com.ching_chang.piggydiary.EDIT_ITEM_INCOME" />
                 <action android:name="com.ching_chang.piggydiary.ADD_ITEM_INCOME" />
+                <action android:name="com.ching_chang.piggydiary.UPDATE_PIC" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -43,12 +49,26 @@
                 <action android:name="com.ching_chang.piggydiary.SHOW_WEEK" />
                 <action android:name="com.ching_chang.piggydiary.SHOW_MONTH" />
                 <action android:name="com.ching_chang.piggydiary.SHOW_ALL" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.ching_chang.piggydiary.MainActivity" />
         </activity>
+        <activity android:name=".ImageActivity" >
+        </activity>
+
+        <service
+            android:name=".BackupService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+        <service
+            android:name=".BackupIntentService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>
