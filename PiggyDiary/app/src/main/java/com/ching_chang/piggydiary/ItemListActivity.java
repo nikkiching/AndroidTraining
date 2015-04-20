@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -65,19 +66,12 @@ public class ItemListActivity extends ActionBarActivity {
 
             switch (requestCode){
                 case EDIT:
-                    MainActivity.message(this,"EDIT Complete");
+                    Toast.makeText(this, R.string.msg_edit, Toast.LENGTH_SHORT).show();
                     int position = data.getIntExtra(KEY_POS, -1);
-
                     if (position != -1) {
                         // reset the item
                         mItemAdapter.set(position, item);
                     }
-                    break;
-                case DELETE:
-                    MainActivity.message(this, "Delete Complete");
-
-                    break;
-                default:
                     break;
             }
         }

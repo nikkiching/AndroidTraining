@@ -1,13 +1,10 @@
 package com.ching_chang.piggydiary;
 
 import android.app.AlertDialog;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.preference.PreferenceFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -17,15 +14,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-import android.widget.ToggleButton;
 
 
 public class MainActivity extends ActionBarActivity {
 
     public static final String TAG = "Main";
     public static final String PREFER = "MainPrefer";
-    public static final String PREFER_BACKUP_REMINDER = "Backup";
+    public static final String PREFER_TIME_INTERVAL = "Timer";
+    private static int mTimer;
+    private static final int MINUT_IN_MILLIS = 60000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +34,7 @@ public class MainActivity extends ActionBarActivity {
                     .commit();
         }
         Intent intent = getIntent();
-        if (BackupService.ACTION_BACKUP.equals(intent.getAction())){
+        if (ReportService.ACTION_REPORT.equals(intent.getAction())){
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
             dialog.setTitle(R.string.backup_title);
             dialog.setMessage(R.string.backup_text);
@@ -45,8 +42,8 @@ public class MainActivity extends ActionBarActivity {
                     DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Intent backup = new Intent(MainActivity.this, BackupService.class);
-                            backup.setAction(BackupService.ACTION_BACKUP);
+                            Intent backup = new Intent(MainActivity.this, ReportService.class);
+                            backup.setAction(ReportService.ACTION_REPORT);
                             startService(backup);
                         }
                     });
@@ -71,55 +68,52 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-//            PrefFragment prefFragment = new PrefFragment();
-//            FragmentManager fragmentManager = getFragmentManager();
-//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//            fragmentTransaction.replace(android.R.id.content, prefFragment);
-//            fragmentTransaction.commit();
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setTitle(R.string.default_notify)
+                .setSingleChoiceItems(R.array.notify_minutes_array, mTimer,
+                        new DialogInterface.OnClickListener(){
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mTimer = which;
+                            }
+                        } )
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        SharedPreferences settings = getSharedPreferences(PREFER, Context.MODE_PRIVATE);
+                        int oldTimer = settings.getInt(PREFER_TIME_INTERVAL, 0);
+                        if (mTimer != oldTimer){
+                            settings.edit().putInt(PREFER_TIME_INTERVAL, mTimer).apply();
+                            cancelAlarm();
+                            if (mTimer != 0) setAlarm(mTimer);
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null);
+            dialog.show();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
-    public static class PrefFragment extends PreferenceFragment {
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.preference);
-        }
-    }
-
     public static class PlaceholderFragment extends Fragment {
-        ToggleButton wantBackup;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            wantBackup = (ToggleButton) rootView.findViewById(R.id.backup_btn);
             restorePreferValue();
             return rootView;
         }
 
         private void restorePreferValue(){
             SharedPreferences settings = getActivity().getSharedPreferences(PREFER, Context.MODE_PRIVATE);
-            Boolean reminder = settings.getBoolean(PREFER_BACKUP_REMINDER, false);
-            wantBackup.setChecked(reminder);
-            if(reminder) {
-//                BackupUtils.startRemind(getActivity(), BackupService.class, 5000, BackupService.ACTION_REMINDER);
-            } else {
-//                BackupUtils.stopRemind(getActivity(), BackupService.class, BackupService.ACTION_REMINDER);
-            }
+            mTimer = settings.getInt(PREFER_TIME_INTERVAL, 0);
         }
 
         @Override
         public void onPause() {
             super.onPause();
-            // Save user backup reminder preferences. Use editor to make changes.
-            SharedPreferences settings = getActivity().getSharedPreferences(PREFER, Context.MODE_PRIVATE);
-            settings.edit().putBoolean(PREFER_BACKUP_REMINDER, wantBackup.isChecked()).apply();
         }
     }
 
@@ -136,8 +130,8 @@ public class MainActivity extends ActionBarActivity {
                 intent.setAction(UpdateActivity.ADD_INCOME);
                 break;
             case R.id.report_btn:
-                Intent backup = new Intent(MainActivity.this, BackupService.class);
-                backup.setAction(BackupService.ACTION_BACKUP);
+                Intent backup = new Intent(MainActivity.this, ReportService.class);
+                backup.setAction(ReportService.ACTION_REPORT);
                 startService(backup);
                 return;
             case R.id.daily_view:
@@ -160,22 +154,18 @@ public class MainActivity extends ActionBarActivity {
         startActivity(intent);
     }
 
-    public static void message(Context context, String msg){
-        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+    public void setAlarm(int choice){
+        String[] timeChoice = getResources().getStringArray(R.array.notify_minutes_value_array);
+        ReportUtils.startRemind(this, ReportService.class,
+                Integer.parseInt(timeChoice[choice]) * MINUT_IN_MILLIS,
+                ReportService.ACTION_REMINDER);
+        Log.d(TAG, "Start the alarm....");
+    }
+    public void cancelAlarm(){
+        Log.d(TAG, "Cancel the alarm....");
+        ReportUtils.stopRemind(this, ReportService.class, ReportService.ACTION_REMINDER);
     }
 
-    public void onToggleClicked(View view) {
-        boolean on = ((ToggleButton) view).isChecked();
-        if (on) {
-            // Start polling
-            Log.d(TAG, "START service");
-            BackupUtils.startRemind(this, BackupService.class, 5000, BackupService.ACTION_REMINDER);
-        } else {
-            //Stop polling service
-            System.out.println("Stop polling service...");
-            BackupUtils.stopRemind(this, BackupService.class, BackupService.ACTION_REMINDER);
-        }
-    }
     @Override
     protected void onDestroy() {
         super.onDestroy();

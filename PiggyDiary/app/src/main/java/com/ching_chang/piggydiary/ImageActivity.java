@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +59,7 @@ public class ImageActivity extends Activity {
                         bmp.recycle();
                     }else {
                         mImageView.setImageBitmap(null);
-                        MainActivity.message(this, "The image is not existed.");
+                        Toast.makeText(this, R.string.image_not_found, Toast.LENGTH_SHORT).show();
                     }
                 }
                 break;
