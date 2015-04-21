@@ -10,7 +10,7 @@ public class Item implements Serializable{
     private long mDate;
     private int mCategory;
     private int mSubCategory;
-    private double mMoney;
+    private int mMoney;
     private String mNote;
     private String mImage;
     private String mImagePath;
@@ -21,7 +21,7 @@ public class Item implements Serializable{
         this.mImage = null;
     }
 
-    public Item(long id, long date, double money,  int category, int subCategory, String note, String image, String path) {
+    public Item(long id, long date, int money,  int category, int subCategory, String note, String image, String path) {
         mId = id;
         mDate = date;
         mCategory = category;
@@ -64,11 +64,11 @@ public class Item implements Serializable{
         this.mSubCategory = subCategory;
     }
 
-    public double getMoney(){
+    public int getMoney(){
         return mMoney;
     }
 
-    public void setMoney(double money){
+    public void setMoney(int money){
         this.mMoney = money;
     }
 

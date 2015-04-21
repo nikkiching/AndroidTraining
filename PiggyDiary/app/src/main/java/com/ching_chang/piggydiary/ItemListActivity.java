@@ -39,17 +39,16 @@ public class ItemListActivity extends ActionBarActivity {
         mDbAdapter.dbOpen();
         Intent intent = getIntent();
         String action = intent.getAction();
-        if (SHOW_DAY.equals(action)){
-            mItems = mDbAdapter.fetchDay();
-        }
-        if (SHOW_WEEK.equals(action)){
-            mItems = mDbAdapter.fetchWeek();
-        }
-        if (SHOW_MONTH.equals(action)){
-            mItems = mDbAdapter.fetchMonth();
-        }
-        if (SHOW_ALL.equals(action)){
-            mItems = mDbAdapter.fetchAll();
+        switch (action){
+            case SHOW_DAY:
+                mItems = mDbAdapter.fetchDay();
+                break;
+            case SHOW_WEEK:
+                mItems = mDbAdapter.fetchWeek();
+                break;
+            case SHOW_MONTH:
+                mItems = mDbAdapter.fetchMonth();
+                break;
         }
         mItemAdapter = new ItemAdapter(this, R.layout.item, mItems);
         mItemList.setAdapter(mItemAdapter);

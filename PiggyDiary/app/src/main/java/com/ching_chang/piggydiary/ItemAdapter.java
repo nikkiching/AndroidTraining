@@ -56,12 +56,14 @@ public class ItemAdapter extends ArrayAdapter<Item> {
         int labelP = item.getCategory();
         if (labelP < mLabelPaymentValue.length ){
             label.setText(mLabelPayment[labelP]);
+            money.setTextColor(getContext().getResources().getColor(R.color.red));
         }else{
             labelP -= mLabelPaymentValue.length;
             label.setText(mLabelIncome[labelP]);
+            money.setTextColor(getContext().getResources().getColor(R.color.grey));
         }
         date.setText(UpdateActivity.mDateFormat.format(new Date(item.getDate())));
-        money.setText(Double.toString((item.getMoney())));
+        money.setText(Integer.toString((item.getMoney())));
         note.setText(item.getNote());
         String imageString = item.getImage();
         if (!TextUtils.isEmpty(imageString)) {

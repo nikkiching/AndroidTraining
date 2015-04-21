@@ -80,7 +80,7 @@ public class UpdateActivity extends ActionBarActivity {
                 break;
             case EDIT_PAYMENT:
                 mItem = (Item) intent.getExtras().getSerializable(ItemListActivity.KEY_ITEM);
-                mMoney.setText(Double.toString(mItem.getMoney()));
+                mMoney.setText(Integer.toString(mItem.getMoney()));
                 mTimeInput = mItem.getDate();
                 mDate.setText(mDateFormat.format(new Date(mTimeInput)));
                 mNote.setText(mItem.getNote());
@@ -90,7 +90,7 @@ public class UpdateActivity extends ActionBarActivity {
                 break;
             case EDIT_INCOME:
                 mItem = (Item) intent.getExtras().getSerializable(ItemListActivity.KEY_ITEM);
-                mMoney.setText(Double.toString(mItem.getMoney()));
+                mMoney.setText(Integer.toString(mItem.getMoney()));
                 mTimeInput = mItem.getDate();
                 mDate.setText(mDateFormat.format(new Date(mTimeInput)));
                 mNote.setText(mItem.getNote());
@@ -166,7 +166,7 @@ public class UpdateActivity extends ActionBarActivity {
         if (TextUtils.isEmpty(mMoney.getText().toString())){
             mItem.setMoney(0);
         }else{
-            mItem.setMoney(Double.parseDouble(mMoney.getText().toString()));
+            mItem.setMoney(Integer.parseInt(mMoney.getText().toString()));
         }
         mItem.setDate(mTimeInput);
         mItem.setSubCategory(mSubLabel.getSelectedItemPosition());

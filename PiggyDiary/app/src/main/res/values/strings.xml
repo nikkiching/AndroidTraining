@@ -6,13 +6,15 @@
     <string name="hello_blank_fragment">Fragment main</string>
     <string name="btn_pay">Payment</string>
     <string name="btn_income">Income</string>
-    <string name="btn_report">Report</string>
+    <string name="btn_report">Save the text report!</string>
     <string name="list_day">Daily Statistics</string>
     <string name="list_week">Weekly Statistics</string>
     <string name="list_month">Monthly Statistics</string>
     <string name="list_all">All Statistics</string>
 
     <string name="pay_title">Payment</string>
+    <string name="income_title">Income</string>
+    <string name="total_title">Total</string>
     <string name="money">Money</string>
     <string name="money_default">0</string>
     <string name="label">Category</string>

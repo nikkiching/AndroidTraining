@@ -4,11 +4,17 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,10 +25,11 @@ public class ReportService extends Service {
     public static final String TAG = "ReportService";
     public static final String ACTION_REMINDER = "com.ching_chang.piggydiary.REMINDER";
     public static final String ACTION_REPORT = "com.ching_chang.piggydiary.REPORT";
+    public static final String KEY_PATH = "Path";
+    private static final String MSG_PATH = "File saved to the path: ";
     private Notification.Builder mNotifyBuilder;
     private NotificationManager mManager;
-    public ReportService() {
-    }
+    private Handler mHandler;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -34,8 +41,21 @@ public class ReportService extends Service {
     public void onCreate() {
         super.onCreate();
         iniNotify();
+        mHandler = new ReportHandler(this);
     }
 
+    protected static class ReportHandler extends Handler {
+        private Context mContext;
+        protected ReportHandler(Context context){
+            mContext = context;
+        }
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Toast.makeText(mContext, MSG_PATH + msg.getData().getString(KEY_PATH,""),
+                    Toast.LENGTH_LONG).show();
+        }
+    }
     private void iniNotify(){
         mManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyBuilder = new Notification.Builder(this);
@@ -47,7 +67,6 @@ public class ReportService extends Service {
     }
 
     private void showNotify(){
-        
         // Setting the activity triggered by the notification
         Intent intent = new Intent(this, MainActivity.class);
         intent.setAction(ACTION_REPORT);
@@ -66,32 +85,8 @@ public class ReportService extends Service {
                 stopSelf();
                 break;
             case ACTION_REPORT:
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d(TAG, "Backup start.");
-                        ItemDbAdapter dbAdapter = new ItemDbAdapter(ReportService.this);
-                        try {
-                            File outFile = createOutFile();
-                            Log.d(TAG, "Output File: stream created");
-                            // Transfer bytes from the inputfile to the outputfile
-                            dbAdapter.dbOpen();
-                            Log.d(TAG, "DB open");
-                            dbAdapter.createCSV(outFile);
-                            Log.d(TAG, "Backup finish");
-                        } catch (IOException ex) {
-                            Log.e(TAG, "Problem happened when writing to csv file.");
-                        } catch (NullPointerException ex){
-                            Log.e(TAG, "Cannot find outFile.");
-                        }
-                        finally {
-                            dbAdapter.dbClose();
-                            Log.d(TAG, "DB close");
-                            Log.d(TAG, "Service finish");
-                            stopSelf();
-                        }
-                    }
-                }).start();
+                Thread saveReport = new RunBackup();
+                saveReport.start();
                 break;
         }
         return super.onStartCommand(intent, flags, startId);
@@ -113,14 +108,35 @@ public class ReportService extends Service {
             return null;
         }
     }
-    class MyBinder extends Binder {
-        public void startBackup(){
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
 
-                }
-            }).start();
+    protected class RunBackup extends Thread {
+        public void run() {
+            Log.d(TAG, "Backup start.");
+            ItemDbAdapter dbAdapter = new ItemDbAdapter(ReportService.this);
+            try {
+                File outFile = createOutFile();
+                Log.d(TAG, "Output File: stream created");
+                // Transfer bytes from the inputfile to the outputfile
+                dbAdapter.dbOpen();
+                Log.d(TAG, "DB open");
+                dbAdapter.createCSV(outFile);
+                Log.d(TAG, "Backup finish");
+                Bundle fileInfo = new Bundle();
+                fileInfo.putString(KEY_PATH, outFile.getPath());
+                Message msg = new Message();
+                msg.setData(fileInfo);
+                mHandler.sendMessage(msg);
+            } catch (IOException ex) {
+                Log.e(TAG, "Problem happened when writing to csv file.");
+            } catch (NullPointerException ex){
+                Log.e(TAG, "Cannot find outFile.");
+            }
+            finally {
+                dbAdapter.dbClose();
+                Log.d(TAG, "DB close");
+                Log.d(TAG, "Service finish");
+                stopSelf();
+            }
         }
     }
 }

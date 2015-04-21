@@ -35,21 +35,30 @@ public class MainActivity extends ActionBarActivity {
         }
         Intent intent = getIntent();
         if (ReportService.ACTION_REPORT.equals(intent.getAction())){
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-            dialog.setTitle(R.string.backup_title);
-            dialog.setMessage(R.string.backup_text);
-            dialog.setPositiveButton(android.R.string.yes, new
-                    DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent backup = new Intent(MainActivity.this, ReportService.class);
-                            backup.setAction(ReportService.ACTION_REPORT);
-                            startService(backup);
-                        }
-                    });
-            dialog.setNegativeButton(android.R.string.no, null);
-            dialog.show();
+            reportDialog(this);
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    public void reportDialog(final Context context){
+        AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+        dialog.setTitle(R.string.backup_title);
+        dialog.setMessage(R.string.backup_text);
+        dialog.setPositiveButton(android.R.string.yes, new
+                DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent backup = new Intent(context, ReportService.class);
+                        backup.setAction(ReportService.ACTION_REPORT);
+                        startService(backup);
+                    }
+                });
+        dialog.setNegativeButton(android.R.string.no, null);
+        dialog.show();
     }
 
     @Override
@@ -71,18 +80,18 @@ public class MainActivity extends ActionBarActivity {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
             dialog.setTitle(R.string.default_notify)
                 .setSingleChoiceItems(R.array.notify_minutes_array, mTimer,
-                        new DialogInterface.OnClickListener(){
+                        new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 mTimer = which;
                             }
-                        } )
+                        })
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         SharedPreferences settings = getSharedPreferences(PREFER, Context.MODE_PRIVATE);
                         int oldTimer = settings.getInt(PREFER_TIME_INTERVAL, 0);
-                        if (mTimer != oldTimer){
+                        if (mTimer != oldTimer) {
                             settings.edit().putInt(PREFER_TIME_INTERVAL, mTimer).apply();
                             cancelAlarm();
                             if (mTimer != 0) setAlarm(mTimer);
@@ -130,9 +139,9 @@ public class MainActivity extends ActionBarActivity {
                 intent.setAction(UpdateActivity.ADD_INCOME);
                 break;
             case R.id.report_btn:
-                Intent backup = new Intent(MainActivity.this, ReportService.class);
-                backup.setAction(ReportService.ACTION_REPORT);
-                startService(backup);
+                reportDialog(this);
+                cancelAlarm();
+                if (mTimer != 0) setAlarm(mTimer);
                 return;
             case R.id.daily_view:
                 intent.setClass(this,ItemListActivity.class);
@@ -145,10 +154,6 @@ public class MainActivity extends ActionBarActivity {
             case R.id.monthly_view:
                 intent.setClass(this,ItemListActivity.class);
                 intent.setAction(ItemListActivity.SHOW_MONTH);
-                break;
-            case R.id.all_view:
-                intent.setClass(this,ItemListActivity.class);
-                intent.setAction(ItemListActivity.SHOW_ALL);
                 break;
         }
         startActivity(intent);

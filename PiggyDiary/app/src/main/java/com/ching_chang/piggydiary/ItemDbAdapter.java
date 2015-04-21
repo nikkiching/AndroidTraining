@@ -116,8 +116,8 @@ public class ItemDbAdapter {
     }
     // Method: Delete
     public boolean delete(long id){
-        String where = KEY_ID + "=" + id;
-        return mDb.delete(DB_TABLE_RECORD, where, null) > 0;
+        String where = KEY_ID + "= ?";
+        return mDb.delete(DB_TABLE_RECORD, where, new String[] {Long.toString(id)}) > 0;
     }
 
     // Method: Fetch
@@ -130,8 +130,18 @@ public class ItemDbAdapter {
         cursor.close();
         return result;
     }
-    public List<Item> fetchDay(){
+    public List<Item> fetchAll(Long t1, Long t2){
         List<Item> result = new ArrayList<>();
+        Cursor cursor = mDb.query(DB_TABLE_RECORD, mCol, KEY_DATE + " BETWEEN ? AND ?",
+                new String[] {Long.toString(t1), Long.toString(t2)},
+                null, null, KEY_DATE);
+        while (cursor.moveToNext()){
+            result.add(getRecord(cursor));
+        }
+        cursor.close();
+        return result;
+    }
+    public List<Item> fetchDay(){
         Calendar c = Calendar.getInstance();
         int day = c.get(Calendar.DAY_OF_MONTH);
         int month = c.get(Calendar.MONTH);
@@ -140,15 +150,9 @@ public class ItemDbAdapter {
         c1.set(year, month, day,0,0,0);
         Calendar c2 = Calendar.getInstance();
         c2.set(year, month, day,23,59,59);
-        Cursor cursor = mDb.query(DB_TABLE_RECORD, mCol, KEY_DATE + " BETWEEN " + c1.getTimeInMillis() + " AND " + c2.getTimeInMillis(), null, null, null, KEY_DATE);
-        while (cursor.moveToNext()){
-            result.add(getRecord(cursor));
-        }
-        cursor.close();
-        return result;
+        return fetchAll(c1.getTimeInMillis(),c2.getTimeInMillis());
     }
     public List<Item> fetchWeek(){
-        List<Item> result = new ArrayList<>();
         Calendar c = Calendar.getInstance();
         int day = c.get(Calendar.DAY_OF_MONTH);
         int month = c.get(Calendar.MONTH);
@@ -159,15 +163,9 @@ public class ItemDbAdapter {
         Calendar c2 = Calendar.getInstance();
         c2.set(year, month, day,23,59,59);
         c2.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek() + 6);
-        Cursor cursor = mDb.query(DB_TABLE_RECORD, mCol, KEY_DATE + " BETWEEN " + c1.getTimeInMillis() + " AND " + c2.getTimeInMillis(), null, null, null, KEY_DATE);
-        while (cursor.moveToNext()){
-            result.add(getRecord(cursor));
-        }
-        cursor.close();
-        return result;
+        return fetchAll(c1.getTimeInMillis(),c2.getTimeInMillis());
     }
     public List<Item> fetchMonth(){
-        List<Item> result = new ArrayList<>();
         Calendar c = Calendar.getInstance();
         int dayMax = c.getActualMaximum(Calendar.DAY_OF_MONTH);
         int dayMin = c.getActualMinimum(Calendar.DAY_OF_MONTH);
@@ -177,17 +175,11 @@ public class ItemDbAdapter {
         c1.set(year, month, dayMin,0,0,0);
         Calendar c2 = Calendar.getInstance();
         c2.set(year, month, dayMax,23,59,59);
-        Cursor cursor = mDb.query(DB_TABLE_RECORD, mCol, KEY_DATE + " BETWEEN " + c1.getTimeInMillis() + " AND " + c2.getTimeInMillis(), null, null, null, KEY_DATE);
-        while (cursor.moveToNext()){
-            result.add(getRecord(cursor));
-        }
-        cursor.close();
-        return result;
+        return fetchAll(c1.getTimeInMillis(),c2.getTimeInMillis());
     }
     public Item getRecord(Cursor cursor) throws SQLException {
-        Item result = new Item(cursor.getLong(0), cursor.getLong(1), cursor.getDouble(2), cursor.getInt(3),
+        return new Item(cursor.getLong(0), cursor.getLong(1), cursor.getInt(2), cursor.getInt(3),
                 cursor.getInt(4), cursor.getString(5), cursor.getString(6), cursor.getString(7));
-        return result;
     }
 
     public void createCSV(File outFile) throws IOException{
@@ -199,40 +191,90 @@ public class ItemDbAdapter {
         try {
             buffer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
             String [] col = { KEY_DATE, KEY_MONEY, KEY_LABEL,KEY_NOTE };
-            cursor = mDb.query(DB_TABLE_RECORD, col, null, null, null, null, KEY_DATE);
-            String head = Arrays.toString(col);
-            buffer.write(head);
+            buffer.write(array2CSV(col));
             buffer.newLine();
             Log.d(TAG, "Write head.");
+
+            cursor = mDb.query(DB_TABLE_RECORD, col, null, null, null, null, KEY_DATE);
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
             String[] labelPayment = mContext.getResources().getStringArray(R.array.labelPayment);
             String[] labelIncome = mContext.getResources().getStringArray(R.array.labelIncome);
+            int payment = 0, income = 0, total;
             while (cursor.moveToNext()){
                 int category = cursor.getInt(2);
                 String label;
                 if ( category < labelPayment.length){
                     label = labelPayment[category];
+                    payment += cursor.getInt(1);
                 } else {
                     label = labelIncome[category-labelPayment.length];
+                    income += cursor.getInt(1);
                 }
-                Log.d(TAG, "label" + label);
                 String[] data = new String[] {
                         dateFormat.format(new Date(cursor.getLong(0))),
-                        Double.toString(cursor.getDouble(1)),
+                        Integer.toString(cursor.getInt(1)),
                         label,
-//                        Integer.toString(category),
                         cursor.getString(3) };
-                buffer.write(Arrays.toString(data));
-                buffer.newLine();
+                if (data.length != 0) {
+                    buffer.write(array2CSV(data));
+                    buffer.newLine();
+                }
             }
+            buffer.newLine();
+            total = income - payment;
+            buffer.write(mContext.getResources().getString(R.string.pay_title) + ", " + payment + ", "
+                    + mContext.getResources().getString(R.string.income_title) + ", " + income + ", "
+                    + mContext.getResources().getString(R.string.total_title) + ", " + total);
+            buffer.newLine();
         } finally {
             if (buffer != null){
                 buffer.flush();
                 buffer.close();
             }
-            if (cursor != null){
-                cursor.close();
+            if (cursor != null) cursor.close();
+        }
+    }
+
+    public String array2CSV(Object[] array){
+        if (array == null || array.length == 0) {
+            return "null";
+        }
+        StringBuilder sb = new StringBuilder(array.length * 2);
+        sb.append(array[0]);
+        for (int i = 1; i < array.length; i++) {
+            sb.append(", ");
+            sb.append(array[i]);
+        }
+        return sb.toString();
+    }
+    public int getMoneySum(int label){
+        Cursor cursor = null;
+        try {
+            cursor = mDb.rawQuery("SELECT SUM(" + KEY_MONEY + ") FROM " + DB_TABLE_RECORD
+                            + "WHERE " + KEY_LABEL + "=?", new String[label]);
+            if(cursor.moveToNext()) {
+                return cursor.getInt(0);
             }
+            return 0;
+        }
+        finally {
+            if (cursor!=null) cursor.close();
+        }
+    }
+
+    public int getMoneySum(long t1, long t2){
+        Cursor cursor = null;
+        try {
+            cursor = mDb.rawQuery("SELECT SUM(" + KEY_MONEY + ") FROM " + DB_TABLE_RECORD
+                            + "WHERE " + KEY_DATE + "BETWEEN ? AND ?" ,
+                    new String[] {Long.toString(t1), Long.toString(t2)});
+            if(cursor.moveToNext()) {
+                return cursor.getInt(0);
+            }
+            return 0;
+        }
+        finally {
+            if (cursor!=null) cursor.close();
         }
     }
 
@@ -245,6 +287,7 @@ public class ItemDbAdapter {
         cursor.close();
         return result;
     }
+
     public class BackupAgent extends BackupAgentHelper {
 
         @Override

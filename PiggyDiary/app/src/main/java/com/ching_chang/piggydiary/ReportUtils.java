@@ -15,8 +15,8 @@ public class ReportUtils {
         Intent intent = new Intent(context, cls);
         intent.setAction(action);
         PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        long triggerStart = SystemClock.elapsedRealtime();
-        manager.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerStart, millis, pendingIntent);
+        long triggerStart = SystemClock.elapsedRealtime() + millis;
+        manager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, triggerStart, millis, pendingIntent);
     }
 
     public static void stopRemind(Context context, Class<?> cls, String action){
