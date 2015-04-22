@@ -43,7 +43,6 @@ public class UpdateActivity extends ActionBarActivity {
     private Button mOk, mCancel, mDate;
     private Spinner mLabel, mSubLabel;
     private DatePickerDialog mPickDate;
-    //private ImageButton mImageView;
     private ImageView mImageView;
     public static SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy/MM/dd");
     private long mTimeInput;
@@ -54,8 +53,11 @@ public class UpdateActivity extends ActionBarActivity {
     private static final int THUMBNAIL_SIZE_X = 200, THUMBNAIL_SIZE_Y = 250;
     private byte[] mImageData = null;
     private String mImagePath;
-
     private String[] mLabelIncomeValue;
+    private int[] mSubLabelPayResource = {R.array.subLabelFood, R.array.subLabelUtility,
+                R.array.subLabelTransportation, R.array.subLabelRecreation, R.array.subLabelStudy,
+                R.array.subLabelMedication, R.array.subLabelOther};
+    private int[] mSubLabelIncomeResource = {R.array.subLabelWork, R.array.subLabelOtherIncome};
     String mAction;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,6 +177,7 @@ public class UpdateActivity extends ActionBarActivity {
             mItem.setImagePath(mImagePath);
         }
     }
+
     private Button.OnClickListener mPickDateListen = new Button.OnClickListener(){
         public void onClick(View v) {
             mPickDate.show();
@@ -184,20 +187,19 @@ public class UpdateActivity extends ActionBarActivity {
     private Spinner.OnItemSelectedListener mLabelListen = new Spinner.OnItemSelectedListener() {
         public void onItemSelected(AdapterView parent, View v, int position, long id){
             // String label = parent.getSelectedItem().toString();
-            ArrayAdapter<CharSequence> sublabelList;
             switch (mAction) {
                 case ADD_PAYMENT:
                 case EDIT_PAYMENT:
-                    sublabelList = subLabelOptionPay(position);
-                    mSubLabel.setAdapter(sublabelList);
+                    mSubLabel.setAdapter(ArrayAdapter.createFromResource(UpdateActivity.this,
+                            mSubLabelPayResource[position], android.R.layout.simple_spinner_item));
                     if (position == mItem.getCategory()) {
                         mSubLabel.setSelection(mItem.getSubCategory());
                     }
                     break;
                 case ADD_INCOME:
                 case EDIT_INCOME:
-                    sublabelList = subLabelOptionIncome(position);
-                    mSubLabel.setAdapter(sublabelList);
+                    mSubLabel.setAdapter(ArrayAdapter.createFromResource(UpdateActivity.this,
+                            mSubLabelIncomeResource[position], android.R.layout.simple_spinner_item));
                     if (position == mItem.getCategory() - Integer.parseInt(mLabelIncomeValue[0])) {
                         mSubLabel.setSelection(mItem.getSubCategory());
                     }
@@ -207,52 +209,6 @@ public class UpdateActivity extends ActionBarActivity {
         public void onNothingSelected(AdapterView parent){
         }
     };
-    private ArrayAdapter<CharSequence> subLabelOptionPay(int position){
-        ArrayAdapter<CharSequence> sublabelList;
-        switch (position){
-            case 0:
-                sublabelList = ArrayAdapter.createFromResource(UpdateActivity.this, R.array.subLabelFood, android.R.layout.simple_spinner_item);
-                break;
-            case 1:
-                sublabelList = ArrayAdapter.createFromResource(UpdateActivity.this, R.array.subLabelUtility, android.R.layout.simple_spinner_item);
-                break;
-            case 2:
-                sublabelList = ArrayAdapter.createFromResource(UpdateActivity.this, R.array.subLabelTransportation, android.R.layout.simple_spinner_item);
-                break;
-            case 3:
-                sublabelList = ArrayAdapter.createFromResource(UpdateActivity.this, R.array.subLabelRecreation, android.R.layout.simple_spinner_item);
-                break;
-            case 4:
-                sublabelList = ArrayAdapter.createFromResource(UpdateActivity.this, R.array.subLabelStudy, android.R.layout.simple_spinner_item);
-                break;
-            case 5:
-                sublabelList = ArrayAdapter.createFromResource(UpdateActivity.this, R.array.subLabelMedication, android.R.layout.simple_spinner_item);
-                break;
-            case 6:
-                sublabelList = ArrayAdapter.createFromResource(UpdateActivity.this, R.array.subLabelOther, android.R.layout.simple_spinner_item);
-                break;
-            default:
-                sublabelList = ArrayAdapter.createFromResource(UpdateActivity.this, R.array.subLabelFood, android.R.layout.simple_spinner_item);
-                break;
-        }
-        return sublabelList;
-    }
-
-    private ArrayAdapter<CharSequence> subLabelOptionIncome(int position){
-        ArrayAdapter<CharSequence> sublabelList;
-        switch (position){
-            case 0:
-                sublabelList = ArrayAdapter.createFromResource(UpdateActivity.this, R.array.subLabelWork, android.R.layout.simple_spinner_item);
-                break;
-            case 1:
-                sublabelList = ArrayAdapter.createFromResource(UpdateActivity.this, R.array.subLabelOtherIncome, android.R.layout.simple_spinner_item);
-                break;
-            default:
-                sublabelList = ArrayAdapter.createFromResource(UpdateActivity.this, R.array.subLabelWork, android.R.layout.simple_spinner_item);
-                break;
-        }
-        return sublabelList;
-    }
 
     private ImageView.OnClickListener mImageListen = new ImageView.OnClickListener(){
 //    private ImageButton.OnClickListener mImageListen = new ImageButton.OnClickListener(){
