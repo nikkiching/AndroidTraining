@@ -15,6 +15,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -36,23 +37,44 @@ public class ItemListActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
         findView();
-        mDbAdapter.dbOpen();
+        mDbAdapter.dbOpenWrite();
         Intent intent = getIntent();
         String action = intent.getAction();
+        Calendar c = Calendar.getInstance();
+        int day = c.get(Calendar.DAY_OF_MONTH);
+        int month = c.get(Calendar.MONTH);
+        int year = c.get(Calendar.YEAR);
+        Calendar c1 = Calendar.getInstance();
+        Calendar c2 = Calendar.getInstance();
         switch (action){
             case SHOW_DAY:
-                mItems = mDbAdapter.fetchDay();
+                c1.set(year, month, day,0,0,0);
+                c2.set(year, month, day,23,59,59);
                 break;
             case SHOW_WEEK:
-                mItems = mDbAdapter.fetchWeek();
+                c1.set(year, month, day,0,0,0);
+                c1.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek());
+                c2.set(year, month, day,23,59,59);
+                c2.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek() + 6);
                 break;
             case SHOW_MONTH:
-                mItems = mDbAdapter.fetchMonth();
+                int dayMax = c.getActualMaximum(Calendar.DAY_OF_MONTH);
+                int dayMin = c.getActualMinimum(Calendar.DAY_OF_MONTH);
+                c1.set(year, month, dayMin,0,0,0);
+                c2.set(year, month, dayMax,23,59,59);
                 break;
         }
-        mItemAdapter = new ItemAdapter(this, R.layout.item, mItems);
-        mItemList.setAdapter(mItemAdapter);
-        setListener();
+        if (! c1.equals(c2)){
+            mItems = mDbAdapter.fetchAll(c1.getTimeInMillis(),c2.getTimeInMillis());
+            if (mItems.isEmpty()){
+                Log.d(TAG, "No list to show.");
+            } else {
+                mItemAdapter = new ItemAdapter(this, R.layout.item, mItems);
+                mItemList.setAdapter(mItemAdapter);
+                setListener();
+                Log.d(TAG, "Show list from " + c1.getTime().toString() + "to " + c2.getTime().toString());
+            }
+        }
     }
 
 

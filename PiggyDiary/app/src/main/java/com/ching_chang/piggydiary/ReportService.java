@@ -117,7 +117,7 @@ public class ReportService extends Service {
                 File outFile = createOutFile();
                 Log.d(TAG, "Output File: stream created");
                 // Transfer bytes from the inputfile to the outputfile
-                dbAdapter.dbOpen();
+                dbAdapter.dbOpenRead();
                 Log.d(TAG, "DB open");
                 dbAdapter.createCSV(outFile);
                 Log.d(TAG, "Backup finish");

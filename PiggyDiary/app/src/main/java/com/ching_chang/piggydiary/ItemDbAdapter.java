@@ -89,12 +89,16 @@ public class ItemDbAdapter {
     }
 
     // Method: Insert
-    public Item insertItem(Item item) {
+    public boolean insertItem(Item item) {
         ContentValues record = putRecord(item);
         // 1: table name, 2: default value for columns without value, 3: content value
         long id = mDb.insert(DB_TABLE_RECORD, null, record);
-        item.setId(id);
-        return item;
+        if (id == -1){
+            return false;
+        } else {
+            item.setId(id);
+            return true;
+        }
     }
 
     // Method: Update
@@ -103,6 +107,7 @@ public class ItemDbAdapter {
         String where = KEY_ID + "=" + item.getID();
         return mDb.update(DB_TABLE_RECORD, record, where, null) > 0 ;
     }
+
     private ContentValues putRecord(Item item){
         ContentValues record = new ContentValues();
         record.put(KEY_MONEY, item.getMoney());
@@ -141,42 +146,7 @@ public class ItemDbAdapter {
         cursor.close();
         return result;
     }
-    public List<Item> fetchDay(){
-        Calendar c = Calendar.getInstance();
-        int day = c.get(Calendar.DAY_OF_MONTH);
-        int month = c.get(Calendar.MONTH);
-        int year = c.get(Calendar.YEAR);
-        Calendar c1 = Calendar.getInstance();
-        c1.set(year, month, day,0,0,0);
-        Calendar c2 = Calendar.getInstance();
-        c2.set(year, month, day,23,59,59);
-        return fetchAll(c1.getTimeInMillis(),c2.getTimeInMillis());
-    }
-    public List<Item> fetchWeek(){
-        Calendar c = Calendar.getInstance();
-        int day = c.get(Calendar.DAY_OF_MONTH);
-        int month = c.get(Calendar.MONTH);
-        int year = c.get(Calendar.YEAR);
-        Calendar c1 = Calendar.getInstance();
-        c1.set(year, month, day,0,0,0);
-        c1.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek());
-        Calendar c2 = Calendar.getInstance();
-        c2.set(year, month, day,23,59,59);
-        c2.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek() + 6);
-        return fetchAll(c1.getTimeInMillis(),c2.getTimeInMillis());
-    }
-    public List<Item> fetchMonth(){
-        Calendar c = Calendar.getInstance();
-        int dayMax = c.getActualMaximum(Calendar.DAY_OF_MONTH);
-        int dayMin = c.getActualMinimum(Calendar.DAY_OF_MONTH);
-        int month = c.get(Calendar.MONTH);
-        int year = c.get(Calendar.YEAR);
-        Calendar c1 = Calendar.getInstance();
-        c1.set(year, month, dayMin,0,0,0);
-        Calendar c2 = Calendar.getInstance();
-        c2.set(year, month, dayMax,23,59,59);
-        return fetchAll(c1.getTimeInMillis(),c2.getTimeInMillis());
-    }
+
     public Item getRecord(Cursor cursor) throws SQLException {
         return new Item(cursor.getLong(0), cursor.getLong(1), cursor.getInt(2), cursor.getInt(3),
                 cursor.getInt(4), cursor.getString(5), cursor.getString(6), cursor.getString(7));
@@ -222,10 +192,9 @@ public class ItemDbAdapter {
             }
             buffer.newLine();
             total = income - payment;
-            buffer.write(mContext.getResources().getString(R.string.pay_title) + ", " + payment + ", "
-                    + mContext.getResources().getString(R.string.income_title) + ", " + income + ", "
-                    + mContext.getResources().getString(R.string.total_title) + ", " + total);
-            buffer.newLine();
+            buffer.write(mContext.getResources().getString(R.string.pay_title) + ", " + payment + "\n"
+                    + mContext.getResources().getString(R.string.income_title) + ", " + income + "\n"
+                    + mContext.getResources().getString(R.string.total_title) + ", " + total +"\n");
         } finally {
             if (buffer != null){
                 buffer.flush();
@@ -239,7 +208,7 @@ public class ItemDbAdapter {
         if (array == null || array.length == 0) {
             return "null";
         }
-        StringBuilder sb = new StringBuilder(array.length * 2);
+        StringBuilder sb = new StringBuilder(array.length * 5);
         sb.append(array[0]);
         for (int i = 1; i < array.length; i++) {
             sb.append(", ");
@@ -325,10 +294,17 @@ public class ItemDbAdapter {
          * of the database. If it cannot be created, throw an exception to signal
          * the failure
          */
-    public ItemDbAdapter dbOpen() throws SQLException {
-        if (mDb == null || !mDb.isOpen()) {
+    public ItemDbAdapter dbOpenWrite() throws SQLException {
+        if (mDb == null) {
             mDbHelper = new ItemDbHelper(mContext);
             mDb = mDbHelper.getWritableDatabase();
+        }
+        return this;
+    }
+    public ItemDbAdapter dbOpenRead() throws SQLException {
+        if (mDb == null) {
+            mDbHelper = new ItemDbHelper(mContext);
+            mDb = mDbHelper.getReadableDatabase();
         }
         return this;
     }

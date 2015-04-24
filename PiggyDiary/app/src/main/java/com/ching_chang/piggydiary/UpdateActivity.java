@@ -14,8 +14,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -47,7 +45,6 @@ public class UpdateActivity extends ActionBarActivity {
     public static SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy/MM/dd");
     private long mTimeInput;
     public static final int REQUEST_IMAGE_CAPTURE = 1, REQUEST_IMAGE_SHOW =2;
-    private ItemDbAdapter mDbAdapter = new ItemDbAdapter(this);
     private Item mItem = new Item();
     boolean mIsTakeNewPicture = false;
     private static final int THUMBNAIL_SIZE_X = 200, THUMBNAIL_SIZE_Y = 250;
@@ -65,7 +62,6 @@ public class UpdateActivity extends ActionBarActivity {
         setContentView(R.layout.activity_update);
         findViews();
         mLabelIncomeValue = getResources().getStringArray(R.array.labelIncomeValue);
-        mDbAdapter.dbOpen();
         setDateField();
         setListeners();
         Intent intent = getIntent();
@@ -138,28 +134,31 @@ public class UpdateActivity extends ActionBarActivity {
         public void onClick(View v) {
             saveField();
             Intent result = getIntent();
+            ItemDbAdapter dbAdapter = new ItemDbAdapter(UpdateActivity.this);
+            dbAdapter.dbOpenWrite();
             switch (mAction){
                 case EDIT_PAYMENT:
                     mItem.setCategory(mLabel.getSelectedItemPosition());
-                    mDbAdapter.updateItem(mItem);
+                    dbAdapter.updateItem(mItem);
                     result.putExtra(ItemListActivity.KEY_ITEM, mItem);
                     setResult(Activity.RESULT_OK, result);
                     break;
                 case ADD_PAYMENT:
                     mItem.setCategory(mLabel.getSelectedItemPosition());
-                    mDbAdapter.insertItem(mItem);
+                    dbAdapter.insertItem(mItem);
                     break;
                 case EDIT_INCOME:
                     mItem.setCategory(Integer.parseInt(mLabelIncomeValue[mLabel.getSelectedItemPosition()]));
-                    mDbAdapter.updateItem(mItem);
+                    dbAdapter.updateItem(mItem);
                     result.putExtra(ItemListActivity.KEY_ITEM, mItem);
                     setResult(Activity.RESULT_OK, result);
                     break;
                 case ADD_INCOME:
                     mItem.setCategory(Integer.parseInt(mLabelIncomeValue[mLabel.getSelectedItemPosition()]));
-                    mDbAdapter.insertItem(mItem);
+                    dbAdapter.insertItem(mItem);
                     break;
             }
+            dbAdapter.dbClose();
             finish();
         }
     };
@@ -260,7 +259,7 @@ public class UpdateActivity extends ActionBarActivity {
 //            mIsTakeNewPicture = true;
             Bundle extras = data.getExtras();
             mImagePath = extras.getString(ImageActivity.KEY_IMAGE_PATH);
-            Matrix matrix = Image.getRotateMatrix(mImagePath);
+            Matrix matrix = ImageUtils.getRotateMatrix(mImagePath);
             Bitmap imageBmp = BitmapFactory.decodeFile(mImagePath);
             Bitmap rotateBmp = Bitmap.createBitmap(imageBmp, 0, 0, imageBmp.getWidth(), imageBmp.getHeight(), matrix, true);
             Bitmap thumbnail = ThumbnailUtils.extractThumbnail(rotateBmp, THUMBNAIL_SIZE_X, THUMBNAIL_SIZE_Y);
@@ -277,7 +276,7 @@ public class UpdateActivity extends ActionBarActivity {
             Bundle extras = data.getExtras();
             mImagePath = extras.getString(ImageActivity.KEY_IMAGE_PATH);
             Bitmap imageBmp = BitmapFactory.decodeFile(mImagePath);
-            Matrix matrix = Image.getRotateMatrix(mImagePath);
+            Matrix matrix = ImageUtils.getRotateMatrix(mImagePath);
 //            Bitmap imageBmp = Image.getScalePicAsView(imagePath,mImageView);
     //        Bitmap thumbnail = Bitmap.createBitmap(imageBmp, 0, 0, imageBmp.getWidth(), imageBmp.getHeight(), matrix, true);
 //            Bitmap thumbnail = Bitmap.createScaledBitmap(imageBmp, mImageView.getWidth(), mImageView.getHeight(), false);
