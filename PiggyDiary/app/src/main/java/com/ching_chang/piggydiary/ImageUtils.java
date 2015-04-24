@@ -12,7 +12,7 @@ import java.io.IOException;
 /**
  * Created by Ching_Chang on 2015/4/14.
  */
-public class Image {
+public class ImageUtils {
     public static final String TAG = "Image class";
     public static Bitmap getScalePicAsView(String absPath, int targetW, int targetH){
         // Get the dimensions of the bitmap

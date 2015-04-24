@@ -3,7 +3,6 @@ package com.ching_chang.piggydiary;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
@@ -51,9 +50,9 @@ public class ImageActivity extends Activity {
             case ACT_SHOW_IMAGE:
                 mPicPath =  intent.getExtras().getString(KEY_IMAGE_PATH);
                 if (! TextUtils.isEmpty(mPicPath)) {
-                    Bitmap bmp = Image.getScalePicAsView(mPicPath, mImageView.getWidth(), mImageView.getHeight());
+                    Bitmap bmp = ImageUtils.getScalePicAsView(mPicPath, mImageView.getWidth(), mImageView.getHeight());
                     if (bmp != null) {
-                        Matrix matrix = Image.getRotateMatrix(mPicPath);
+                        Matrix matrix = ImageUtils.getRotateMatrix(mPicPath);
                         Bitmap rotateBmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
                         mImageView.setImageBitmap(rotateBmp);
                         bmp.recycle();
@@ -126,8 +125,8 @@ public class ImageActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Matrix matrix = Image.getRotateMatrix(mPicPath);
-            Bitmap imageBmp = Image.getScalePicAsView(mPicPath, mImageView.getWidth(), mImageView.getHeight());
+            Matrix matrix = ImageUtils.getRotateMatrix(mPicPath);
+            Bitmap imageBmp = ImageUtils.getScalePicAsView(mPicPath, mImageView.getWidth(), mImageView.getHeight());
 
             Bitmap rotateBmp = Bitmap.createBitmap(imageBmp, 0, 0, imageBmp.getWidth(), imageBmp.getHeight(), matrix, true);
             imageBmp.recycle();
